@@ -17,7 +17,7 @@ class DataLoggerWidget(QWidget):
     def __init__(self, context):
 
         super(DataLoggerWidget, self).__init__()
-        ui_file = os.path.join(rospkg.RosPack().get_path('data_logger_bag'), 'resource', 'DataLogger.ui')
+        ui_file = os.path.join(rospkg.RosPack().get_path('data_logger_bag'), 'resource', 'DataLogger_test.ui')
         loadUi(ui_file, self)
 
         self.setObjectName('DataLoggerUi')

@@ -2,7 +2,7 @@
 <launch>
 
     <arg name="node_name" default="data_logger"/>
-    <arg name="record_topics" default="/robot/joint_states /robot/limb/right/endpoint_state /usb_cam/image_raw"/>
+    <arg name="record_topics" default="/robot/joint_states /robot/limb/right/endpoint_state"/>
     <arg name="data_prefix" default="collection"/>
     <arg name="datapath" default="data/robot"/>
     <arg name="logger_flag" default="data_logger_flag"/>

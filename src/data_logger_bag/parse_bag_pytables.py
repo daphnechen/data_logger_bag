@@ -134,7 +134,7 @@ class DataTableBagProcessor():
     def setup_h5(self):
 
         filters = tables.Filters(complevel=9)
-        self.h5file = tables.openFile(self.output_filename, mode="w", title="Aggregated Exploration Data",
+        self.h5file = tables.open_file(self.output_filename, mode="w", title="Aggregated Exploration Data",
                                  filters = filters)
 
         rospy.loginfo("Initialized h5 output file")
@@ -164,7 +164,7 @@ class DataTableBagProcessor():
           
             # Check if group_name is empty
             root_name = os.path.split(self.input_filenames)[-1]
-            group_name = self.h5file.createGroup("/", root_name) 
+            group_name = self.h5file.create_group("/", root_name) 
 
             # Actually calls the heavy duty function 
             self.process_all_recurse(self.input_filenames, group_name) 
@@ -190,7 +190,7 @@ class DataTableBagProcessor():
         if dirs:
             for directory in dirs:
                 foldername = os.path.split(directory)[-1]
-                new_group = self.h5file.createGroup(group_name, foldername)
+                new_group = self.h5file.create_group(group_name, foldername)
                 self.process_all_recurse(os.path.join(filename,directory), new_group) 
              
 

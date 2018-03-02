@@ -617,16 +617,16 @@ class TableBagData():
         rospy.loginfo("Writing file: %s to pytable as %s" % (path_name[1], group_name))
 
         if bag_dir_group is None:
-            bag_group = self.h5file.createGroup("/", group_name)
+            bag_group = self.h5file.create_group("/", group_name)
         else:
-            bag_group = self.h5file.createGroup(bag_dir_group, group_name)
+            bag_group = self.h5file.create_group(bag_dir_group, group_name)
 
         # Go through and write dictionary types into pytable
         for topic in self.all_data:
             msg_type = self.topic_types[topic]
 
             topic_name = '_'.join(topic.split('/'))
-            topic_group = self.h5file.createGroup(bag_group, topic_name)
+            topic_group = self.h5file.create_group(bag_group, topic_name)
             data = self.all_data[topic]
 
             if msg_type == 'geometry_msgs/Wrench':
@@ -756,7 +756,7 @@ class TableBagData():
         fields = ['time','latest_time']
         for person_id in data:
             # Create a new group for each person
-            person_group = self.h5file.createGroup(topic_group, 'user0'+str(person_id))
+            person_group = self.h5file.create_group(topic_group, 'user0'+str(person_id))
           
             # Write off time information
             self.pytable_writer_helper(person_group, fields, tables.Float64Atom(), data[person_id])
@@ -765,7 +765,7 @@ class TableBagData():
             for body_part_name in data[person_id]['body_parts']:
                 # Pull out data
                 body_part_data = data[person_id]['body_parts'][body_part_name]
-                body_part_group = self.h5file.createGroup(person_group, body_part_name)
+                body_part_group = self.h5file.create_group(person_group, body_part_name)
 
                 # Write off the transform information
                 self.pytable_writer_helper(body_part_group, body_part_data.keys(), tables.Float64Atom(), body_part_data)
@@ -805,17 +805,17 @@ class TableBagData():
                     data = [list(x) if not isinstance(x,float) else [x] for x in data]
                     self.write_recurse(topic_group, topic, data)
                 elif isinstance(data[-1], list) or isinstance(data[-1], dict):
-                    obj_group = self.h5file.createGroup(topic_group, topic)
+                    obj_group = self.h5file.create_group(topic_group, topic)
                     for i in xrange(len(data)):
                         if isinstance(data[-1],list):
-                            item_group = self.h5file.createGroup(obj_group, topic+str(i))
+                            item_group = self.h5file.create_group(obj_group, topic+str(i))
                         else:
                             item_group = obj_group
                         self.write_recurse(item_group, topic+str(i), data[i])
                 else:
                     rospy.logwarn("Warning this type: %s unknown" % type(data))
         elif isinstance(data, dict):
-            dict_group = self.h5file.createGroup(topic_group, topic)
+            dict_group = self.h5file.create_group(topic_group, topic)
             for field in data:
                 self.write_recurse(dict_group, field, data[field])
         elif isinstance(data, float) or isinstance(data,int):
@@ -870,7 +870,7 @@ class TableBagData():
         # populate the structure now
         for i in xrange(data['max_item']):
             single_obj = cluster_dict[i]
-            obj_group = self.h5file.createGroup(topic_group, 'object_'+str(i))
+            obj_group = self.h5file.create_group(topic_group, 'object_'+str(i))
             self.pytable_writer_helper(obj_group, single_obj.keys(), tables.Float64Atom(), single_obj)
 
     def write_cameraInfo(self, topic_group, data):

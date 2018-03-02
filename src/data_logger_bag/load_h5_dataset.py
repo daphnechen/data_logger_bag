@@ -170,10 +170,10 @@ def load_data(input_filename, output_filename, save_to_file,
             output_filename = output_filename + '.pkl'
 
     # Load the data from an h5 file
-    all_data = tables.openFile(input_filename)
+    all_data = tables.open_file(input_filename)
     
     # Much faster way to access the root node
-    root_data = all_data.getNode('/')
+    root_data = all_data.get_node('/')
 
     if directories is not None:
         (stored_data, done) = load_data_section(root_data, directories, True, max_level=max_level, spec_key=spec_key)
@@ -184,7 +184,7 @@ def load_data(input_filename, output_filename, save_to_file,
         # Pull pointers to only the file heads of the data structure
         # Very slow method - instead we just group the name and evaluate
         #all_runs_root = [_g for _g in all_data.walkGroups("/") if _g._v_depth == 1]
-        all_runs_root = [_g for _g in all_data.getNode('/')._v_groups]
+        all_runs_root = [_g for _g in all_data.get_node('/')._v_groups]
 
         # For each file extract the segments and data
         for _objectRunName in all_runs_root:

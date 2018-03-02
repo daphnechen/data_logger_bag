@@ -1,2 +1,6 @@
 *.pyc
 *.swp
+
+# Ignore data files
+*.bag
+*.h5
