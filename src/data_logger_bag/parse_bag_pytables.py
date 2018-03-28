@@ -56,12 +56,12 @@ from table_bag_data import TableBagData
 
 class DataTableBagProcessor(object):
 
-    def __init__(self, bagFilename, inputBagFile):
+    def __init__(self, inputBagFile):
 
-        self.bagFilename = bagFilename
+        self.inputBagFile = inputBagFile
 
         # Intialize the node
-        rospy.init_node("bag_parser", anonymous=True)
+        # rospy.init_node("bag_parser", anonymous=True)
         rospy.loginfo("Initializing bag parser")
       
         ###################################################################
@@ -76,7 +76,8 @@ class DataTableBagProcessor(object):
         # read paramater
         self.skip_topics = rospy.get_param("~skip_topics", default_skip_topics)
         input_files = rospy.get_param("~input_files", inputBagFile)
-        output_file = rospy.get_param("~output_file", self.bagFilename+".h5")  # changed from converted
+        tempoutfile = self.inputBagFile.replace('.bag', '')
+        output_file = rospy.get_param("~output_file", tempoutfile+".h5")  # changed from converted
 
         # These need to be set if we want to subsample down to a topic
         # Otherwise by default nothing is aligned

@@ -244,7 +244,9 @@ class BagDataLogger:
         # Kill all extra rosbag "record" nodes
         self.terminate_ros_node("/record")
 
-        bagfile = self.filename + '.bag'
+        # temp = self.datapath + self.filename
+        # print(self.datapath)
+        # bagfile = String(temp)
 
         # # Create processor to convert .bag to .h5
         # proc = DataTableBagProcessor(self.filename, bagfile)  # from parse_bag_pytables
@@ -254,7 +256,7 @@ class BagDataLogger:
 
         # Publish out what bag file that we finished recording to
         self.bag_file_loc_pub.publish(String(self.datapath))
-        self.convert(bagfile)
+        self.convert(self.datapath)
 
 
     def convert(self, bagfile):
@@ -263,7 +265,7 @@ class BagDataLogger:
         # bagfile = self.filename + '.bag'
 
         # Create processor to convert .bag to .h5
-        proc = DataTableBagProcessor(self.filename, bagfile)
+        proc = DataTableBagProcessor(bagfile)
         proc.setup_h5()
         proc.process_general()
         proc.h5file.close()
