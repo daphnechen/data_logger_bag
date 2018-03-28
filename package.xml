@@ -5,11 +5,11 @@
   <description>This package uses ROS bag files to record and then parse into HDF5 format for data storage</description>
 
   <author email="vchu@gatech.edu">Vivian Chu</author>
-  <maintainer email="vchu@gatech.edu">Vivian Chu</maintainer>
+  <maintainer email="daphne.chen@gatech.edu">Daphne Chen</maintainer>
 
   <license>BSD</license>
 
-  <url type="website">https://github.com/vchu/data_logger_bag</url>
+  <url type="website">https://github.com/daphnechen/data_logger_bag</url>
 
   <buildtool_depend>catkin</buildtool_depend>
   <build_depend>message_generation</build_depend>

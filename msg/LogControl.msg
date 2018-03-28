@@ -16,3 +16,6 @@ bool playback
 
 # Name of the run
 string runName
+
+# ID of the user
+string userID

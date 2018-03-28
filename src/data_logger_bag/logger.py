@@ -46,6 +46,7 @@ import signal
 from std_msgs.msg import Bool, String
 from data_logger_bag.msg import LogControl
 from data_logger_bag.srv import GetSettingsResponse, GetSettings
+from parse_bag_pytables import *  # Use for conversion from .bag --> .h5
 
 class BagDataLogger:
 
@@ -82,16 +83,17 @@ class BagDataLogger:
         # Initialize the flag to false
         self.logger_flag = False
 
-        # Intialize default task and skill names
+        # Intialize default task, skill, and user name/ids
         self.task = "default_task"
         self.skill = "default_skill"
+        self.userid = "default_user"
 
         # Initialize some default runName
         self.runName = "";
         self.filename = "";
 
         # Append the task and skill onto the data_location
-        self.data_custom_location = os.path.join(self.data_location, self.task, self.skill)
+        self.data_custom_location = os.path.join(self.data_location, self.skill, self.userid)  # removed task from dir
 
         # Setup publisher for bagfile
         self.bag_file_loc_pub = rospy.Publisher('bag_file_loc', String, queue_size=10)
@@ -110,6 +112,7 @@ class BagDataLogger:
         msg = LogControl()
         msg.taskName = self.task
         msg.skillName = self.skill
+        msg.userID = self.userid
         msg.actionType = self.data_prefix
         msg.topics = self.record_topics
         msg.runName = self.runName
@@ -157,11 +160,14 @@ class BagDataLogger:
             if msg.runName is not "":
                 self.runName = msg.runName
                 rospy.loginfo("Filename to be written is: %s" % self.runName)
+
+            if msg.userID is not "":
+                self.userid = msg.userID
     
             playback_flag = msg.playback
 
             # Append the task and skill onto the data_location
-            self.data_custom_location = os.path.join(self.data_location, self.task, self.skill) 
+            self.data_custom_location = os.path.join(self.data_location, self.skill, self.userid)  # Removed rask from dir
             rospy.loginfo("Location writing changed to: %s" % self.data_custom_location)
 
             # What topics we're recording
@@ -207,9 +213,9 @@ class BagDataLogger:
     
         rospy.loginfo("Set up bag file to write to")
         if self.runName is "":
-            filename = self.data_prefix + "_"+time.strftime("%Y-%m-%dT%H%M%S") + ".bag"
+            filename = self.data_prefix + ".bag"  # Removed the timestamp
         else:
-            filename = self.data_prefix + "_"+self.runName+"_"+time.strftime("%Y-%m-%dT%H%M%S") + ".bag"
+            filename = self.runName + ".bag"
         # Store the current filename
         self.filename = filename
 
@@ -238,8 +244,29 @@ class BagDataLogger:
         # Kill all extra rosbag "record" nodes
         self.terminate_ros_node("/record")
 
-        # Publish out what bag file that we finished reccording to
+        bagfile = self.filename + '.bag'
+
+        # # Create processor to convert .bag to .h5
+        # proc = DataTableBagProcessor(self.filename, bagfile)  # from parse_bag_pytables
+        # proc.setup_h5()
+        # proc.process_general()
+        # proc.h5file.close()
+
+        # Publish out what bag file that we finished recording to
         self.bag_file_loc_pub.publish(String(self.datapath))
+        self.convert(bagfile)
+
+
+    def convert(self, bagfile):
+        print('TRYING TO CONVERT TO H5!!!!')
+        rospy.loginfo('TRYING TO CONVERT !!!!!!!!')
+        # bagfile = self.filename + '.bag'
+
+        # Create processor to convert .bag to .h5
+        proc = DataTableBagProcessor(self.filename, bagfile)
+        proc.setup_h5()
+        proc.process_general()
+        proc.h5file.close()
 
     '''
     Useful function from ROS answers that kills all nodes with the string match

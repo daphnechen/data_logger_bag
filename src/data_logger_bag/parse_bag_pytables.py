@@ -54,9 +54,11 @@ from collections import defaultdict
 import numpy as np
 from table_bag_data import TableBagData
 
-class DataTableBagProcessor():
+class DataTableBagProcessor(object):
 
-    def __init__(self):
+    def __init__(self, bagFilename, inputBagFile):
+
+        self.bagFilename = bagFilename
 
         # Intialize the node
         rospy.init_node("bag_parser", anonymous=True)
@@ -73,8 +75,8 @@ class DataTableBagProcessor():
 
         # read paramater
         self.skip_topics = rospy.get_param("~skip_topics", default_skip_topics)
-        input_files = rospy.get_param("~input_files", "")
-        output_file = rospy.get_param("~output_file", "converted_data.h5")
+        input_files = rospy.get_param("~input_files", inputBagFile)
+        output_file = rospy.get_param("~output_file", self.bagFilename+".h5")  # changed from converted
 
         # These need to be set if we want to subsample down to a topic
         # Otherwise by default nothing is aligned
@@ -101,8 +103,9 @@ class DataTableBagProcessor():
         # Check if we passed in a directory and setup proper input/output files
         if os.path.isdir(input_files):
             self.input_filenames = input_files
+            tempFilename = self.bagFilename + '.h5'
 
-            if 'converted_data.h5' in output_file: 
+            if tempFilename in output_file: 
                 # Setup output file names with directory format
                 file_split = input_files.split(os.sep)
                 self.output_filename = file_split[-1]+'.h5'
@@ -394,158 +397,29 @@ class DataTableBagProcessor():
                 exec('obj.'+sub_msg_name+'=sub_obj')
 
         return obj
-        '''
-        obj = Object()
-        obj._type = msg_type
-
-        vec_obj = Object()
-        vec_obj.x = float('nan')
-        vec_obj.y = float('nan')
-        vec_obj.z = float('nan')
-        vec_obj._type = 'geometry_msgs/Vector3'
-
-        if msg_type == 'geometry_msgs/Wrench':
-            obj.force = vec_obj
-            obj.torque = vec_obj
-            return obj
-
-        elif msg_type == 'geometry_msgs/Pose':
-            point_obj = Object()
-            point_obj._type = 'geometry_msgs/Pose'
-
-            point_obj.position = Object()
-            point_obj.position.x = float('nan')
-            point_obj.position.y = float('nan')
-            point_obj.position.z = float('nan')
-            point_obj.position._type = 'geometry_msgs/Point'
-
-            point_obj.orientation = Object()
-            point_obj.orientation.x = float('nan')
-            point_obj.orientation.y = float('nan')
-            point_obj.orientation.z = float('nan')
-            point_obj.orientation.w = float('nan')
-            point_obj.orientation._type = 'geometry_msgs/Quaternion'
-
-            return point_obj
-
-        elif msg_type == 'std_msgs/Int8':
-            obj.data = float('nan')
-            return obj
-
-        # This is a simple hack the determine how many states
-        # Be aware that joint_states might not actually have 57 states
-        elif msg_type == 'sensor_msgs/JointState':
-            if topic == 'joint_states':
-                num_joint = 57
-            elif topic == 'zlift_state':
-                num_joint = 1
-            else:
-                num_joint = 36
-
-            obj.name = ['no_joints'] * num_joint
-            obj.position = [float('nan')]* num_joint
-            obj.velocity = [float('nan')]* num_joint
-            obj.effort = [float('nan')]* num_joint
-            return obj
-            
-        elif msg_type == 'rospcseg/ClusterArrayV0':
-            obj_clusters = Object()
-
-            obj_clusters.centroid = vec_obj
-            obj_clusters.angle = float('nan')
-
-            color = Object()
-            color.r = float('nan')
-            color.g = float('nan')
-            color.b = float('nan')
-            color.a = float('nan')
-            color._type = 'std_msgs/ColorRGBA'
-            obj_clusters.rgba_color =  color
-
-            obj_clusters.volume2 = float('nan')
-            obj_clusters.bb_volume = float('nan')
-            obj_clusters.bb_area = float('nan')
-
-            obj_clusters.aligned_bounding_box_size = vec_obj
-
-            obj_clusters.bb_aspect_ratio = float('nan')
-            obj_clusters.av_ratio = float('nan') 
-            obj_clusters.compactness = float('nan')
-
-            obj_clusters.aligned_bounding_box_center = vec_obj
-
-            obj_clusters.min = vec_obj
-            obj_clusters.max = vec_obj
-            obj.clusters = [obj_clusters]
-            return obj
-
-        elif msg_type == 'std_msgs/String':
-            obj.data = 'no_data'
-            return obj
-            
-        elif msg_type == 'data_logger_bag/LogControl':
-            obj.taskName = 'no task'
-            obj.actionType = 'no action'
-            obj.skillName = 'no skil;'
-            obj.topics = 'no topics'
-            obj.playback = False
-            return obj
-            
-        elif msg_type == 'std_msgs/Bool':
-            obj.data = False
-            return obj
-
-        elif msg_type == 'sensor_msgs/Image':
-            obj.header = None
-            obj.height = float('nan')
-            obj.width = float('nan')
-            obj.encoding = ""
-            obj.step = float('nan')
-            obj.data = ''
-            return obj
-
-        elif msg_type == 'geometry_msgs/Pose2D':
-            obj.x = float('nan')
-            obj.y = float('nan')
-            obj.theta = float('nan')
-            return obj
-
-        elif msg_type == 'audio_common_msgs/AudioData':
-            obj.data = []
-            #obj.data = [float('nan')]*2048
-            rospy.logwarn("Audio might be misaligned")
-            return obj
-
-        elif msg_type == 'gait_capture/PersonFrame':
-            obj.person_id = float('nan')
-            obj.latest_time = float('nan')
-            obj.body_parts = []
-            return obj
-
-        elif msg_type == 'cob_people_detection_msgs/DetectionArray':
-            obj.detections = [float('nan')]
-            return obj
-
-        else:
-            rospy.logerr("Message type: %s is not supported" % msg_type)
-        '''
+        
 
 class Object:
     pass
 
-def main():
+# def main():
 
-    # Create DataTableBag object
-    data = DataTableBagProcessor()
+#     # Create DataTableBag object
+#     data = DataTableBagProcessor()
 
-    # Open up h5 file to write
-    data.setup_h5()
+#     # Open up h5 file to write
+#     data.setup_h5()
         
-    # start processing bag files
-    data.process_general()
+#     # start processing bag files
+#     data.process_general()
 
-    # Close the h5 file
-    data.h5file.close()
+#     # Close the h5 file
+#     data.h5file.close()
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     # main()
+#     data = DataTableBagProcessor(filename)
+#     data.setup_h5()
+#     data.process_general()
+#     data.h5file.close()
+
