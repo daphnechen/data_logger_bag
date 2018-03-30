@@ -75,7 +75,7 @@ class DataTableBagProcessor(object):
 
         # read paramater
         self.skip_topics = rospy.get_param("~skip_topics", default_skip_topics)
-        input_files = rospy.get_param("~input_files", inputBagFile)
+        input_files = rospy.get_param("~input_files", self.inputBagFile)
         tempoutfile = self.inputBagFile.replace('.bag', '')
         output_file = rospy.get_param("~output_file", tempoutfile+".h5")  # changed from converted
 

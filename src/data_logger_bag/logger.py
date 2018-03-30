@@ -89,8 +89,8 @@ class BagDataLogger:
         self.userid = "default_user"
 
         # Initialize some default runName
-        self.runName = "";
-        self.filename = "";
+        self.runName = ""
+        self.filename = ""
 
         # Append the task and skill onto the data_location
         self.data_custom_location = os.path.join(self.data_location, self.skill, self.userid)  # removed task from dir
@@ -244,25 +244,15 @@ class BagDataLogger:
         # Kill all extra rosbag "record" nodes
         self.terminate_ros_node("/record")
 
-        # temp = self.datapath + self.filename
-        # print(self.datapath)
-        # bagfile = String(temp)
-
-        # # Create processor to convert .bag to .h5
-        # proc = DataTableBagProcessor(self.filename, bagfile)  # from parse_bag_pytables
-        # proc.setup_h5()
-        # proc.process_general()
-        # proc.h5file.close()
-
         # Publish out what bag file that we finished recording to
         self.bag_file_loc_pub.publish(String(self.datapath))
+
+        rospy.sleep(1.0)
         self.convert(self.datapath)
 
 
     def convert(self, bagfile):
-        print('TRYING TO CONVERT TO H5!!!!')
-        rospy.loginfo('TRYING TO CONVERT !!!!!!!!')
-        # bagfile = self.filename + '.bag'
+        rospy.loginfo('Converting bag file to h5')
 
         # Create processor to convert .bag to .h5
         proc = DataTableBagProcessor(bagfile)
