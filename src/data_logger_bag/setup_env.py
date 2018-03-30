@@ -18,10 +18,13 @@ class ObjPose():
 
         self.limb = intera_interface.Limb('right')
 
-        self.obj_poses = PoseArray()
-        self.init_joints = JointState()
+        self.obj_poses = None
+        self.init_joints = None
         self.robot_init_pos = self.limb.joint_angles()
         self.trial_init_pos = self.limb.joint_angles()  # []
+
+        self.neutral_joint_pos = self.get_neutral_joint_pos()
+
         self.skill = "default_skill"
         self.runName = ""
 
@@ -33,7 +36,7 @@ class ObjPose():
         # Check to make sure the user does want to move the robot to init
         response = raw_input("Do you want to move Sawyer back to its neutral position? Enter y/n \n")
         if response in ["y", "Y", 'yes', 'Yes']:
-            self.move_to_neutral_pos()  # Move Sawyer to a neutral position before starting
+            self.limb.move_to_joint_positions(self.neutral_joint_pos)  # Move Sawyer to a neutral position before starting
             rospy.sleep(0.5)
         
         self.obj_pub = rospy.Publisher("obj_pos", PoseArray, queue_size=10)  # Create new topic
@@ -42,28 +45,30 @@ class ObjPose():
         rospy.Subscriber(self.logger_flag_topic, Bool, self.flag_callback)
         rospy.Subscriber(self.c6_task_topic, LogControl, self.change_log_settings_cb)
 
-        rate = rospy.Rate(10)
+        rate = rospy.Rate(100)
         while not rospy.is_shutdown():
-            if self.obj_poses:  # Not empty
+            if self.obj_poses is not None:  # Check if empty
                 self.obj_pub.publish(self.obj_poses)
+            if self.init_joints is not None:
                 self.init_pub.publish(self.init_joints)
-                rate.sleep()
+            rate.sleep()
 
+        rospy.spin()
 
     '''
     Move Sawyer back to our specific initial position
     '''
     # [0.4677822265625, -0.9013076171875, -0.479220703125, -0.9098486328125, 0.1876142578125, 0.9019873046875, 1.960962890625, -0.912791015625, 0.0]
-    def move_to_neutral_pos(self):
-        angles = self.limb.joint_angles()
-        angles['right_j0'] = -0.9013076171875
-        angles['right_j1'] = -0.479220703125
-        angles['right_j2'] = -0.9098486328125
-        angles['right_j3'] = 0.1876142578125
-        angles['right_j4'] = 0.9019873046875
-        angles['right_j5'] = 1.960962890625
-        angles['right_j6'] = -0.912791015625
-        self.limb.move_to_joint_positions(angles)
+    def get_neutral_joint_pos(self):
+        neutral_joint_pos = self.limb.joint_angles()
+        neutral_joint_pos['right_j0'] = -0.9013076171875
+        neutral_joint_pos['right_j1'] = -0.479220703125
+        neutral_joint_pos['right_j2'] = -0.9098486328125
+        neutral_joint_pos['right_j3'] = 0.1876142578125
+        neutral_joint_pos['right_j4'] = 0.9019873046875
+        neutral_joint_pos['right_j5'] = 1.960962890625
+        neutral_joint_pos['right_j6'] = -0.912791015625
+        return neutral_joint_pos
 
     '''
     Populate the PoseArray obj_poses with the positions of each object
@@ -71,7 +76,7 @@ class ObjPose():
     '''
     def change_env(self, skill, trial):
         print('change_env executing')
-        self.obj_poses = PoseArray()
+        self.obj_poses = PoseArray()  # Clear obj_poses each time
         print skill
 
         if skill == 'REACHING':
@@ -109,16 +114,6 @@ class ObjPose():
         #     if trial is 'RUN0':
         #     elif trial is 'RUN1':
 
-        # For testing
-
-
-        # self.trial_init_pos['right_j0'] = 0.0
-        # self.trial_init_pos['right_j1'] = 0.0
-        # self.trial_init_pos['right_j2'] = 0.0
-        # self.trial_init_pos['right_j3'] = 0.0
-        # self.trial_init_pos['right_j4'] = 0.0
-        # self.trial_init_pos['right_j5'] = 0.0
-        # self.trial_init_pos['right_j6'] = 0.0
 
     '''
     Update the skill and trial when changed
@@ -140,9 +135,9 @@ class ObjPose():
             # Check to make sure the user does want to move the robot to init
             response = raw_input("Do you want to move Sawyer back to its initial position? Enter y/n \n")
             if response in ["y", "Y", 'yes', 'Yes']:
-                self.go_to_trial_init_pos(self.trial_init_pos)  # Move Sawyer to its initial position before starting next trial
+                self.limb.move_to_joint_positions(self.neutral_joint_pos)
+                # self.go_to_trial_init_pos(self.trial_init_pos)  # Move Sawyer to its initial position before starting next trial
                 rospy.sleep(0.5)
-
         else:
             rospy.loginfo("Currently still writing previous record. Settings for logging NOT changed")
 
@@ -170,12 +165,12 @@ class ObjPose():
                 self.logger_flag = False
 
 
-    '''
-    Send Sawyer back into the initial position for the next trial
-    '''
-    def go_to_trial_init_pos(self, pos):
-        # self.limb.move_to_joint_positions(self.robot_init_pos)
-        self.limb.move_to_joint_positions(pos)
+    # '''
+    # Send Sawyer back into the initial position for the next trial
+    # '''
+    # def go_to_trial_init_pos(self, pos):
+    #     # self.limb.move_to_joint_positions(self.robot_init_pos)
+    #     self.limb.move_to_joint_positions(pos)
 
 
 

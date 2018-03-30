@@ -2,11 +2,12 @@
 <launch>
 
     <arg name="node_name" default="data_logger"/>
-    <arg name="record_topics" default="/robot/joint_states /robot/limb/right/endpoint_state /usb_cam/image_raw /obj_pos"/>
+    <arg name="record_topics" default="/robot/joint_states /robot/limb/right/endpoint_state /usb_cam_1/image_raw /usb_cam_2/image_raw /obj_pos /init_joint_pos"/>
     <arg name="data_prefix" default="collection"/>
     <arg name="datapath" default="data/robot"/>
     <arg name="logger_flag" default="data_logger_flag"/>
 
+     
 
     <!-- Setup the node with parameters for what we want to listen to 
          and what the flag used to trigger recording -->
@@ -16,6 +17,8 @@
         <!-- This location assumes that it is in your home dir. NOTE: path will be created for you -->
         <!-- default: data -->
         <param name="datapath" value="$(arg datapath)" type="string"/>
+
+        <param name="skip_topics" value="/usb_cam_1/image_raw /usb_cam_2/image_raw" type="string"/>
 
         <!-- Note: the topics are separated just by spaces -->
         <!-- default: joint_states c6_logger_flag -->
@@ -39,6 +42,35 @@
         <param name="log_flag_topic" value="$(arg logger_flag)" type="string"/>
 
     </node>
+
+    <!-- Nodes for camera feed -->
+  <node name="usb_cam_1" pkg="usb_cam" type="usb_cam_node" output="screen" >
+    <param name="camera_topic" value="image_raw" />
+    <param name="video_device" value="/dev/video0" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+  </node>
+  <node name="image_view" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/usb_cam_1/image_raw"/>
+    <param name="autosize" value="true" />
+  </node>
+
+ <node name="usb_cam_2" pkg="usb_cam" type="usb_cam_node" output="screen">
+    <param name="camera_topic" value="image_raw" />
+    <param name="video_device" value="/dev/video1" />
+    <param name="image_width" value="640" />
+    <param name="image_height" value="480" />
+    <param name="pixel_format" value="yuyv" />
+    <param name="camera_frame_id" value="usb_cam" />
+    <param name="io_method" value="mmap"/>
+  </node>
+  <node name="image_view_1" pkg="image_view" type="image_view" respawn="false" output="screen">
+    <remap from="image" to="/usb_cam_2/image_raw"/>
+    <param name="autosize" value="true" />
+  </node> 
 
     <!-- This node will republish out topics to address the rosjava rosbag bug -->
     <!--node name="logger_repub" pkg="data_logger_bag" type="rosjava_topic_republisher.py" respawn="true" output="screen" /-->
