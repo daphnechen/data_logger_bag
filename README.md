@@ -16,7 +16,7 @@ For more details on how to install and tutorials on how to run the package pleas
 
 This package (despite its name) now contains the ability to launch three primary nodes: the data logger (which records and converts the data from each trial run), the environment setup (which gets the object positions and allows the user to reset Sawyer into its initial position before each trial), and the camera feed. Look at the launch file study_bringup.launch.
 
-In order to run everything in unison, start up three separate terminal instances in intera and run the following commands:
+In order to run everything in unison, start up three separate terminal instances in intera (be sure you are connected to Sawyer) and run the following commands:
 
 *(TERMINAL 1)*
 >> roslaunch data_logger_bag study_bringup.launch
@@ -28,6 +28,8 @@ In order to run everything in unison, start up three separate terminal instances
 *(TERMINAL 3)*
 >> rostopic pub -1 /data_logger_flag std_msgs/Bool "data: true"
 * (toggle data from true/false in order to start/stop publishing)
+
+Once the launch file is started, you will receive a prompt asking whether you want to move Sawyer back to its initial position. After answering the prompt, two video feeds will appear with different views of the experiment.
 
 When this is done, you should have two files for this trial - RUNO.bag and RUNO.h5 in the above example. This should be located in a directory with a similar structure:
 >> /home/[user]/data/robot/REACHING/

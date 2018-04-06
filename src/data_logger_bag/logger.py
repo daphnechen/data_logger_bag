@@ -153,6 +153,7 @@ class BagDataLogger:
 
             if msg.skillName is not "":
                 self.skill = msg.skillName
+                rospy.loginfo("Skill name to be written is: %s" % self.skill)
 
             if msg.topics is not "":
                 self.record_topics = msg.topics
